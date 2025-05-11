@@ -47,6 +47,7 @@ class Q4Instructions(Page):
     @staticmethod
     def is_displayed(player):
         return player.shown_in_this_round == 4
+        # change the 4 to reflect the number in the randomized page's name
 
 
 @randomized_order
