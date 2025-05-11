@@ -15,7 +15,7 @@ This app randomizes the sequence of pages in oTree experiments, implementing bet
 ## Key Features & Notes
 
 - If a page uses a custom `is_displayed`, ensure this method checks the page's name against `player.shown_in_this_round`
-- Non-randomized pages can be freely added to the `page_sequence` without affecting randomization (in the example app: `Start` and `End`)
+- Non-randomized pages can be freely added to the `page_sequence` without affecting randomization (in the example app: `Start` and `End`) - however, note that oTree processes the `page_sequence` strictly linearly. This means that non-randomized pages added as “neighbors” of otherwise randomized pages will be shown repeatedly. See below for an advanced use-case of instructions for one of the randomized pages.
 - The code performs some automatic validation of page naming conventions and configuration requirements
 - When properly configured, the app generates up to *k*! unique page sequences
 - Statistics about the distribution of sequences are output to the command line during execution
@@ -28,6 +28,37 @@ This app randomizes the sequence of pages in oTree experiments, implementing bet
       seed=-1,  # Setting to -1 disables the seed
   ),
   ```
+
+## Advanced: Putting a Page Before (or After) Randomized Pages
+
+Sometimes one wishes to inform subjects about something before or after something else happens, but *on a separate page*.
+
+The following example works:
+
+```python
+...
+
+@randomized_order
+class Q3(Page):
+    pass
+
+
+class Q4Instructions(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.shown_in_this_round == 4
+
+
+@randomized_order
+class Q4(Page):
+    pass
+
+...
+
+page_sequence = [..., Q3, Q4Instructions, Q4, ...]
+```
+
+Needless to say, if you were to put a similar `Page` after `Q4`, you will have access to any and all fields generated up until the end of `Q4`.
 
 ## License
 
