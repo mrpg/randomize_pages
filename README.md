@@ -15,7 +15,7 @@ This app randomizes the sequence of pages in oTree experiments, implementing bet
 ## Key Features & Notes
 
 - If a page uses a custom `is_displayed`, ensure this method checks the page's name against `player.shown_in_this_round`
-- Non-randomized pages can be freely added to the `page_sequence` without affecting randomization (in the example app: `Start` and `End`) - however, note that oTree processes the `page_sequence` strictly linearly. This means that non-randomized pages added as “neighbors” of otherwise randomized pages will be shown repeatedly. See below for an advanced use-case of instructions for one of the randomized pages.
+- Non-randomized pages can be freely added to the `page_sequence` without affecting randomization (in the example app: `Start` and `End`) - however, note that oTree processes the `page_sequence` strictly linearly. This means that non-randomized pages added as “neighbors” of otherwise randomized pages will be shown repeatedly. See below for a use-case of instructions for one of the randomized pages.
 - The code performs some automatic validation of page naming conventions and configuration requirements
 - When properly configured, the app generates up to *k*! unique page sequences
 - Statistics about the distribution of sequences are output to the command line during execution
@@ -29,37 +29,29 @@ This app randomizes the sequence of pages in oTree experiments, implementing bet
   ),
   ```
 
-## Advanced: Putting a Page Before (or After) Randomized Pages
+## Putting a Page Before (or After) Randomized Pages
 
 Sometimes one wishes to inform subjects about something before or after something else happens, but *on a separate page*.
 
-The following example works:
+See the page `Q4Instructions` in the app's Python code.
 
-```python
-...
+## Analysis
 
-@randomized_order
-class Q3(Page):
-    pass
+For simple cases (numeric player fields), the function `declutter()` from `stats/extract.R` may be used to obtain field values and the round they were elicited in. Make sure to call `declutter()` with your session's original data and the fields you are interested in.
 
+I played around with the example app. Let `r` denote the round of elicitation. Within the experiment, I manually set `age = 10r` and `siblings = 2r`. The R script resulted in the following `data.frame`:
 
-class Q4Instructions(Page):
-    @staticmethod
-    def is_displayed(player):
-        return player.shown_in_this_round == 4
-        # change the 4 to reflect the number in the randomized page's name
-
-
-@randomized_order
-class Q4(Page):
-    pass
-
-...
-
-page_sequence = [..., Q3, Q4Instructions, Q4, ...]
+```txt
+> fielddata
+  participant.code age age.order siblings siblings.order
+1         8frdwkpz  20         2        8              4
+2         0743r8jj  10         1       10              5
+3         mgzx353u  30         3        4              2
 ```
 
-Needless to say, if you were to put a similar `Page` after `Q4`, you will have access to any and all fields generated up until the end of `Q4`.
+Clearly, field values and orders were extracted correctly. This result could now be conveniently used with other R functions.
+
+If necessary, you can use an `dplyr::inner_join` on the original data and the result from `declutter()` to link the two data sets.
 
 ## License
 

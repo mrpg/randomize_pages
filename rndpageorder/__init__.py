@@ -24,7 +24,12 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    # this field is required
     shown_in_this_round = models.IntegerField()
+
+    # example field on pages Q1, Q4
+    age = models.IntegerField()
+    siblings = models.IntegerField()
 
 
 def creating_session(subsession):
@@ -98,7 +103,8 @@ class Start(Page):
 
 @randomized_order
 class Q1(Page):
-    pass
+    form_model = "player"
+    form_fields = ["siblings"]
 
 
 @randomized_order
@@ -111,9 +117,16 @@ class Q3(Page):
     pass
 
 
+class Q4Instructions(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.shown_in_this_round == 4
+
+
 @randomized_order
 class Q4(Page):
-    pass
+    form_model = "player"
+    form_fields = ["age"]
 
 
 @randomized_order
@@ -129,7 +142,7 @@ class End(Page):
         return player.round_number == C.NUM_ROUNDS
 
 
-page_sequence = [Start, Q1, Q2, Q3, Q4, Q5, End]
+page_sequence = [Start, Q1, Q2, Q3, Q4Instructions, Q4, Q5, End]
 
 assert all(
     any((page_id(p) == i) for p in page_sequence) for i in range(1, C.NUM_ROUNDS + 1)
